@@ -48,10 +48,10 @@ class Display:
                 self.ballLi.append(Ball())  #加一个球
                 # self.boardLi[addBall.getGuessedY()[0]].appendGuessY(addBall.getGuessedY())
                 self.setServeTime() #更新发球时间
-    def timeCounter(self):
+    def timeCounter(self):  #更新剩余时间
         if self.start and int(time.time() - self.startTime) >= maxTime - self.timeLast + 1:
             self.timeLast -= 1
-            if self.timeLast == 0:
+            if self.timeLast == 0:  #剩余时间为0 游戏结束
                 self.finished = True
     def timeCountDown(self):
         if time.time() - self.startTime >= 1:
@@ -92,7 +92,7 @@ class Display:
             pygame.draw.rect(screen,colorLi[4],boundaryPosi[0],0)   #灰色轨道条
             pygame.draw.rect(screen,colorLi[4],boundaryPosi[1],0)
         if self.start and not self.finished:    #游戏进行过程
-            for eachBall in self.ballLi:
+            for eachBall in self.ballLi:    #遍历所有球
                 if eachBall.isOut():
                     self.ballLi.remove(eachBall)
                     continue

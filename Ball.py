@@ -3,14 +3,14 @@ import random
 import math
 from Const import *
 def getRandSpeed():
-    velo = random.randint(ballVeloRange[0],ballVeloRange[1])
-    x = velo
-    y = 0
-    while x & y == 0:
-        angle = random.uniform(0, 2 * math.pi)
+    velo = random.randint(ballVeloRange[0],ballVeloRange[1])    #随机球的速度
+    x = 0   #x坐标
+    y = 0   #y坐标
+    while (x & y) == 0:   #避免0速度bug 不能只有x或y轴分量
+        angle = random.uniform(0, 2 * math.pi)  #随机方向角
         x = round(velo * math.cos(angle))
         y = round(velo * math.sin(angle))
-    return [x,y]
+    return [x,y]    #返回速度向量
 def dotProduct(A,B):
     return [A[0] * B[0],A[1] * B[1]]
 def mult(k,A) :
@@ -22,13 +22,13 @@ def plus(A,B) :
 
 class Ball():
     def __init__(self):
-        self.color = colorLi[0]
-        self.radius = circleRadius
-        self.posi = screenMid
-        self.speed = getRandSpeed()
+        self.color = UNSELECTED_COLOR   #球颜色
+        self.radius = BALL_RADIUS       #球半径
+        self.posi = SCREEN_MID_POSI     #球位置
+        self.speed = getRandSpeed()     #球速度
         self.guessedY = self.updateGuessY()
-        self.belongTo = initName
-        self.out = False
+        self.belongTo = NULL_NAME    #球属于哪个player
+        self.out = False    #球是否出界
     def setBelongTo(self,name):
         self.belongTo = name
     def getBelongTo(self):
@@ -45,12 +45,12 @@ class Ball():
         self.color = color
     def getGuessedY(self):
         return self.guessedY
-    def isRebound(self,board):
-        return self.posi[1] >= board.getPosi()[1] and self.posi[1] <= board.getPosi()[1] + boardY
-    def isTopCorner(self,board):
-        return self.posi[1] >= board.getPosi()[1] - self.radius and self.posi[1] < board.getPosi()[1]
-    def isBottomCorner(self,board):
-        return self.posi[1] > board.getPosi()[1] + boardY and self.posi[1] <= board.getPosi()[1] + boardY + self.radius
+    def isRebound(self,board):  #反弹判定 球的y轴在板子范围内
+        return self.posi[Y_AXIS] >= board.getPosi()[Y_AXIS] and self.posi[Y_AXIS] <= board.getPosi()[Y_AXIS] + BOARD_Y_SIZE
+    # def isTopCorner(self,board):  #板子上顶角反弹判断
+    #     return self.posi[Y_AXIS] >= board.getPosi()[Y_AXIS] - self.radius and self.posi[Y_AXIS] < board.getPosi()[Y_AXIS]
+    # def isBottomCorner(self,board):   #板子下顶角反弹判断
+    #     return self.posi[Y_AXIS] > board.getPosi()[Y_AXIS] + boardY and self.posi[Y_AXIS] <= board.getPosi()[Y_AXIS] + boardY + self.radius
     def getNewSpeed(self,board,rVec):
         vr = dotProduct(self.speed,rVec)
         vr = mult(1/self.radius**2,vr)
@@ -61,18 +61,19 @@ class Ball():
         newV = plus(vr,vt)
         newV = plus(newV,vr2)
         return newV
-    def boundaryJudge(self,boardLi):
-        if self.posi[1] - self.radius <= 0:#top
-            self.speed[1] = -self.speed[1]
-        elif self.posi[1] + self.radius >= screenSize[1]:#bottom
-            self.speed[1] = -self.speed[1]
-        if self.posi[0] - self.radius <= boardX:#left
-            if self.isRebound(boardLi[0]):
-                self.speed[0] = -self.speed[0]
-                self.color = colorLi[1]
-                self.belongTo = boardLi[0].getName()
+    def boundaryJudge(self,boardLi):    #边界判断
+        if self.posi[Y_AXIS] - self.radius <= 0: #top
+            self.speed[Y_AXIS] = -self.speed[Y_AXIS]  #上边界反弹
+        elif self.posi[Y_AXIS] + self.radius >= SCREEN_Y_SIZE:   #bottom
+            self.speed[Y_AXIS] = -self.speed[Y_AXIS]  #下边界反弹
+        if self.posi[X_AXIS] - self.radius <= BOARD_X_SIZE:    #left
+            if self.isRebound(boardLi[PLAYER_1_CODE]):  #如果反弹
+                self.speed[X_AXIS] = -self.speed[X_AXIS]
+                self.color = PLAYER_1_COLOR
+                self.belongTo = boardLi[PLAYER_1_CODE].getName()
                 self.guessedY = self.updateGuessY()
                 self.guessedY[3] = 1
+            #角反弹判断 有bug
             # elif self.isBottomCorner(boardLi[0]):
             #     rVec = [boardLi[0].getPosi()[0] + boardX - self.posi[0], boardLi[0].getPosi()[1] + boardY - self.posi[1]]
             #     if rVec[0]**2 + rVec[1]**2 == self.radius**2:
@@ -87,15 +88,15 @@ class Ball():
             #         self.speed = [round(newV[0]),round(newV[1])]
             #         self.color = colorLi[1]
             #         self.belongTo = boardLi[0].getName()
-            else :
+            else :  #不反弹判定为出界
                 self.out = True
-                if self.belongTo == 1 :
-                    boardLi[1].addScore()
-        elif self.posi[0] + self.radius >= screenSize[0] - boardX:#right
-            if self.isRebound(boardLi[1]):
+                if self.belongTo == PLAYER_2_CODE :     #如果为p2的球 p2加分
+                    boardLi[PLAYER_2_CODE].addScore()
+        elif self.posi[X_AXIS] + self.radius >= SCREEN_X_SIZE - BOARD_X_SIZE:  #right
+            if self.isRebound(boardLi[PLAYER_2_CODE]):  #如果反弹
                 self.speed[0] = -self.speed[0]
-                self.color = colorLi[2]
-                self.belongTo = boardLi[1].getName()
+                self.color = PLAYER_2_COLOR
+                self.belongTo = boardLi[PLAYER_2_CODE].getName()
                 self.guessedY = self.updateGuessY()
                 self.guessedY[3] = 2
             # elif self.isBottomCorner(boardLi[1]):
@@ -112,10 +113,10 @@ class Ball():
             #         self.speed = [round(newV[0]),round(newV[1])]
             #         self.color = colorLi[1]
             #         self.belongTo = boardLi[1].getName()
-            else :
+            else :  #不反弹判定为出界
                 self.out = True
-                if self.belongTo == 0 :
-                    boardLi[0].addScore()
+                if self.belongTo == PLAYER_1_CODE :     #如果为p1的球 p1加分
+                    boardLi[PLAYER_1_CODE].addScore()
     def show(self,screen):
         pygame.draw.circle(screen,self.color,self.posi,self.radius)
         if self.guessedY[0] == 0:
