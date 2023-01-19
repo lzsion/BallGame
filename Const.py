@@ -3,8 +3,9 @@ fps = 144   #帧率
 circleRadius = 10   
 BALL_RADIUS = 10    #球半径
 guessRedius = 4
-boardVelo = 8
-computerPlayer = [0]
+boardVelo = 8   #板子移动速度
+BOARD_VELOCITY = 8   #板子移动速度
+computerPlayer = []
 showGuessPoint = True
 maxBallNum = 5
 intervalTime = 1    #发球间隔时间
@@ -12,6 +13,9 @@ ballVeloRange = (2,6)   #球速度范围
 maxTime = 60    #一局时间(秒)
 precision = 8
 computerEvent = (computerUpEvent,computerDownEvent,computerStopEvent) = ('UP','DOWN','STOP')
+COMPUTER_UP_EVENT = 'UP'
+COMPUTER_DOWN_EVENT = 'DOWN'
+COMPUTER_STOP_EVENT = 'STOP'
 boardSize = boardX , boardY = 10,100
 screenSize = screenX , screenY = (800,800)
 X_AXIS = 0
@@ -23,9 +27,11 @@ BOARD_Y_SIZE = 100   #移动版y长度
 SCREEN_X_SIZE = 800  #窗口x长度
 SCREEN_Y_SIZE = 800  #窗口y长度
 SCREEN_MID_POSI = (SCREEN_X_SIZE//2 , SCREEN_Y_SIZE//2)
+BACKGROUND_COLOR = (0,0,0)
 UNSELECTED_COLOR = (255,255,255)    #未被选择球的颜色
 PLAYER_1_COLOR = (0,0,255)
 PLAYER_2_COLOR = (0,255,0)
+RAIL_COLOR = (50,50,50)
 colorLi = [(255,255,255),
             (0,0,255),
             (0,255,0),
@@ -37,7 +43,8 @@ boardInitPosi = [(0,screenY//2 - boardY//2,boardX,boardY),
                 (screenX - boardX,screenY//2 - boardY//2,boardX,boardY)]
 boundaryPosi = [(0,0,boardX,screenY), 
                 (screenX - boardX,0,boardX,screenY)]
-
+BOUNDARY_LEFT_RECT = (0,0,boardX,screenY)
+BOUNDARY_RIGHT_RECT = (screenX - boardX,0,boardX,screenY)
 pygame.font.init()
 font_1 = pygame.font.Font('E:/data/learn/pygame/game_3/font/microsoftyahei.ttf', 22)
 font_2 = pygame.font.Font('E:/data/learn/pygame/game_3/font/microsoftyahei.ttf', 28)

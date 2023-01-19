@@ -13,10 +13,10 @@ class Display:
         # ballLi.append(Ball(velo//3))
         # for i in range(ballNum):
         #     ballLi.append(Ball())
-        self.upKey1 = Key()     #p1向上
-        self.downKey1 = Key()   #p1向下
-        self.upKey2 = Key()     #p2向上
-        self.downKey2 = Key()   #p2向下
+        # self.upKey1 = Key()     #p1向上
+        # self.downKey1 = Key()   #p1向下
+        # self.upKey2 = Key()     #p2向上
+        # self.downKey2 = Key()   #p2向下
         self.start = False  #游戏阶段
         self.countDown = False  #准备阶段开始倒计时
         self.finished = False   #游戏结束
@@ -67,46 +67,48 @@ class Display:
         if event.type == pygame.KEYDOWN:
             if self.start and not self.finished:    #游戏进行过程
                 if event.key == pygame.K_w:
-                    self.upKey1.downEvent()     #w键按下 反映为p1的上
+                    self.boardLi[PLAYER_1_CODE].upKey.downEvent()     #w键按下
                 if event.key == pygame.K_s:
-                    self.downKey1.downEvent()   #s键按下 反映为p1的下
+                    self.boardLi[PLAYER_1_CODE].downKey.downEvent()   #s键按下
                 if event.key == pygame.K_UP:
-                    self.upKey2.downEvent()     #上键按下 反映为p2的上
+                    self.boardLi[PLAYER_2_CODE].upKey.downEvent()     #上键按下
                 if event.key == pygame.K_DOWN:
-                    self.downKey2.downEvent()   #下键按下 反映为p2的下
+                    self.boardLi[PLAYER_2_CODE].downKey.downEvent()   #下键按下
             if event.key == pygame.K_SPACE and self.countDown == False and self.start == False and self.finished == False:
                 self.begin()    #空格键开始
         if event.type == pygame.KEYUP:
             if self.start and not self.finished:    #游戏进行过程
                 if event.key == pygame.K_w:
-                    self.upKey1.upEvent()       #w键松开 p1停止向上
+                    self.boardLi[PLAYER_1_CODE].upKey.upEvent()       #w键松开
                 if event.key == pygame.K_s:
-                    self.downKey1.upEvent()     #s键松开 p1停止向下
+                    self.boardLi[PLAYER_1_CODE].downKey.upEvent()     #s键松开
                 if event.key == pygame.K_UP:
-                    self.upKey2.upEvent()       #上键松开 p2停止向上
+                    self.boardLi[PLAYER_2_CODE].upKey.upEvent()       #上键松开
                 if event.key == pygame.K_DOWN:
-                    self.downKey2.upEvent()     #下键松开 p2停止向下
+                    self.boardLi[PLAYER_2_CODE].downKey.upEvent()     #下键松开
     def setScreen(self,screen):
-        screen.fill((0,0,0))    #黑色背景
+        screen.fill(BACKGROUND_COLOR)    #黑色背景
         if self.finished == False:
-            pygame.draw.rect(screen,colorLi[4],boundaryPosi[0],0)   #灰色轨道条
-            pygame.draw.rect(screen,colorLi[4],boundaryPosi[1],0)
+            pygame.draw.rect(screen,RAIL_COLOR,BOUNDARY_LEFT_RECT,0)   #灰色轨道条
+            pygame.draw.rect(screen,RAIL_COLOR,BOUNDARY_RIGHT_RECT,0)
         if self.start and not self.finished:    #游戏进行过程
             for eachBall in self.ballLi:    #遍历所有球
-                if eachBall.isOut():
-                    self.ballLi.remove(eachBall)
+                if eachBall.isOut():    #如果球出界
+                    self.ballLi.remove(eachBall)    #移除该球
                     continue
-                eachBall.move(self.boardLi)
+                eachBall.move(self.boardLi) #正常的球
                 eachBall.show(screen)
-        if not self.boardLi[0].getIsComputer():
-            if self.upKey1.isDown() and self.downKey1.isUp():
-                self.boardLi[0].eventKeyUp()
-            elif self.downKey1.isDown() and self.upKey1.isUp():
-                self.boardLi[0].eventKeyDown()
+        if not self.boardLi[PLAYER_1_CODE].getIsComputer(): #如果p1不是电脑
+            if self.boardLi[PLAYER_1_CODE].upKey.isDown() and self.boardLi[PLAYER_1_CODE].downKey.isUp():
+                #如果按下'上' 松开'下'
+                self.boardLi[PLAYER_1_CODE].eventKeyUp()    #板子向上移动
+            elif self.boardLi[PLAYER_1_CODE].downKey.isDown() and self.boardLi[PLAYER_1_CODE].upKey.isUp():
+                #如果按下'下' 松开'上'
+                self.boardLi[PLAYER_1_CODE].eventKeyDown()  #板子向下移动
         elif self.start and not self.finished :
-            if self.boardLi[0].computerEvent(self.ballLi) == computerUpEvent:
-                self.boardLi[0].eventKeyUp()
-            elif self.boardLi[0].computerEvent(self.ballLi) == computerDownEvent:
+            if self.boardLi[PLAYER_1_CODE].computerEvent(self.ballLi) == COMPUTER_UP_EVENT:
+                self.boardLi[PLAYER_1_CODE].eventKeyUp()
+            elif self.boardLi[PLAYER_1_CODE].computerEvent(self.ballLi) == COMPUTER_DOWN_EVENT:
                 self.boardLi[0].eventKeyDown()
         if not self.boardLi[1].getIsComputer():
             if self.upKey2.isDown() and self.downKey2.isUp():

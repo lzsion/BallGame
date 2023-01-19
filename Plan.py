@@ -2,7 +2,7 @@ from Const import *
 def computerEvent(allBallLi,sideBoard):
     sideBallLi = []
     sideBoardTop = sideBoard.getPosi()[1]
-    sideBoardBottom = sideBoardTop + boardY
+    sideBoardBottom = sideBoardTop + BOARD_Y_SIZE
     # minTick = screenY // boardVelo + 100
     # haveball = False
     for eachBall in allBallLi:

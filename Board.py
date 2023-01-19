@@ -3,6 +3,7 @@ import pygame
 import random
 import math
 from Const import *
+from Key import *
 class Board:
     def __init__(self,name):
         if name == 'player1':
@@ -13,9 +14,11 @@ class Board:
             self.color = colorLi[2]
             self.posi = boardInitPosi[1]
             self.name = 1
-        self.size = boardSize
+        self.size = (BOARD_X_SIZE,BOARD_Y_SIZE)
         self.speed = [0,0]
         self.score = 0
+        self.upKey = Key()
+        self.downKey = Key()
         # self.guessedY = []
         self.isComputer = False
     def setIsComputer(self):
@@ -38,29 +41,26 @@ class Board:
         self.score += 1
     def getScore(self):
         return self.score
-    def boundaryJudge(self):
-        if self.posi[1] + self.speed[1] < 0:#top
+    def boundaryJudge(self):    #边界判定
+        if self.posi[Y_AXIS] + self.speed[Y_AXIS] < 0:  #上边界
+            self.speed = [0,0]            
+        elif self.posi[Y_AXIS] + BOARD_Y_SIZE + self.speed[Y_AXIS] > screenSize[Y_AXIS]:   #下边界
             self.speed = [0,0]
-            return False
-        elif self.posi[1] + boardY + self.speed[1] > screenSize[1]:#bottom
-            self.speed = [0,0]
-            return False
-    def move(self):
-        self.boundaryJudge()
-        self.posi = (self.posi[0] , self.posi[1] + self.speed[1],boardX,boardY)
-
-    def eventKeyUp(self):
-        self.speed = [0,-boardVelo]
-        self.move()
-    def eventKeyDown(self):
-        self.speed = [0,boardVelo]
-        self.move()
-    def show(self,screen):
+    def move(self):     #移动
+        self.boundaryJudge()    #判断边界
+        self.posi = (self.posi[X_AXIS] , self.posi[Y_AXIS] + self.speed[Y_AXIS])    #更新位置
+    def eventKeyUp(self):   #向上事件
+        self.speed = [0,-BOARD_VELOCITY]    #设定速度
+        self.move() #移动
+    def eventKeyDown(self): #向下事件
+        self.speed = [0,BOARD_VELOCITY]     #设定速度
+        self.move() #移动
+    def show(self,screen):  #显示屏幕
         pygame.draw.rect(screen,self.color,self.posi,0)
-    def computerEvent(self,allBallLi):
+    def computerEvent(self,allBallLi):  #电脑分析
         sideBallLi = []
-        sideBoardTop = self.getPosi()[1]
-        sideBoardBottom = sideBoardTop + boardY
+        sideBoardTop = self.getPosi()[Y_AXIS]
+        sideBoardBottom = sideBoardTop + BOARD_Y_SIZE
         for eachBall in allBallLi:
             guessedY = eachBall.getGuessedY()
             if guessedY[0] == self.name:

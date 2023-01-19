@@ -39,6 +39,8 @@ class Ball():
         return self.speed
     def getPosi(self):
         return self.posi
+    def getRadius(self):
+        return self.radius
     def isOut(self):
         return self.out
     def setColor(self,color):
@@ -75,14 +77,14 @@ class Ball():
                 self.guessedY[3] = 1
             #角反弹判断 有bug
             # elif self.isBottomCorner(boardLi[0]):
-            #     rVec = [boardLi[0].getPosi()[0] + boardX - self.posi[0], boardLi[0].getPosi()[1] + boardY - self.posi[1]]
+            #     rVec = [boardLi[0].getPosi()[0] + BOARD_X_SIZE - self.posi[0], boardLi[0].getPosi()[1] + boardY - self.posi[1]]
             #     if rVec[0]**2 + rVec[1]**2 == self.radius**2:
             #         newV = self.getNewSpeed(boardLi[0],rVec)
             #         self.speed = [round(newV[0]),round(newV[1])]
             #         self.color = colorLi[1]
             #         self.belongTo = boardLi[0].getName()
             # elif self.isTopCorner(boardLi[0]):
-            #     rVec = [boardLi[0].getPosi()[0] + boardX - self.posi[0], boardLi[0].getPosi()[1] - self.posi[1]]
+            #     rVec = [boardLi[0].getPosi()[0] + BOARD_X_SIZE - self.posi[0], boardLi[0].getPosi()[1] - self.posi[1]]
             #     if rVec[0]**2 + rVec[1]**2 == self.radius**2:
             #         newV = self.getNewSpeed(boardLi[0],rVec)
             #         self.speed = [round(newV[0]),round(newV[1])]
@@ -120,61 +122,77 @@ class Ball():
     def show(self,screen):
         pygame.draw.circle(screen,self.color,self.posi,self.radius)
         if self.guessedY[0] == 0:
-            guessPosi = (boardX,self.guessedY[1])
+            guessPosi = (BOARD_X_SIZE,self.guessedY[1])
             if showGuessPoint:
                 pygame.draw.circle(screen,colorLi[self.guessedY[3]],guessPosi,guessRedius)
         elif self.guessedY[0] == 1:
-            guessPosi = (screenX - boardX,self.guessedY[1])
+            guessPosi = (SCREEN_X_SIZE - BOARD_X_SIZE,self.guessedY[1])
             if showGuessPoint:
                 pygame.draw.circle(screen,colorLi[self.guessedY[3]],guessPosi,guessRedius)
-    def move(self,boardLi):
-        self.boundaryJudge(boardLi)
-        self.posi = (self.posi[0] + self.speed[0] , self.posi[1] + self.speed[1])
+    def move(self,boardLi): #球移动
+        self.posi = (self.posi[X_AXIS] + self.speed[X_AXIS] , self.posi[Y_AXIS] + self.speed[Y_AXIS])
+        self.boundaryJudge(boardLi) #更新边界判断
     def updateGuessY(self):
-        ballX = self.getPosi()[0]
-        ballY = self.getPosi()[1]
-        ballR = circleRadius
-        veloX = self.getSpeed()[0]
-        veloY = self.getSpeed()[1]
+        ballX = self.getPosi()[X_AXIS]  #球位置
+        ballY = self.getPosi()[Y_AXIS]
+        ballR = self.getRadius()        #球半径
+        veloX = self.getSpeed()[X_AXIS] #球速度
+        veloY = self.getSpeed()[Y_AXIS]
         global guessY
-        if veloX > 0 and veloY > 0:
-            tick = (screenX - boardX - ballX - ballR) / veloX
-            detaY = veloY * tick - (screenY - ballR - ballY)
-            if detaY <= 0:
+        if veloX > 0 and veloY > 0: #往右下的球
+            deltaX = SCREEN_X_SIZE - BOARD_X_SIZE - ballX - ballR   #到右边界的距离
+            tick = deltaX / veloX   #触碰到右边界的时间
+            deltaY = SCREEN_Y_SIZE - ballR - ballY    #此时与下边界的距离
+            excessY = veloY * tick - deltaY     #超出的距离
+            if excessY <= 0:  #没有碰到边界
                 guessY = ballY + veloY * tick
-            elif (detaY // (screenY - 2 * ballR)) % 2 == 0:
-                guessY = screenY - ballR - detaY % (screenY - 2 * ballR)
-            elif (detaY // (screenY - 2 * ballR)) % 2 == 1:
-                guessY = ballR + detaY % (screenY - 2 * ballR)
-            return [1,guessY,tick,0]
-        elif veloX > 0 and veloY < 0:
-            tick = (screenX - boardX - ballX - ballR) / veloX
-            detaY = (-veloY) * tick - (ballY - ballR)
-            if detaY < 0:
-                guessY = ballY - (-veloY) * tick
-            elif (detaY // (screenY - 2 * ballR)) % 2 == 1:
-                guessY = screenY - ballR - detaY % (screenY - 2 * ballR)
-            elif (detaY // screenY) % 2 == 0:
-                guessY = ballR + detaY % (screenY - 2 * ballR)
-            return [1,guessY,tick,0]
-        elif veloX < 0 and veloY > 0:
-            tick = (ballX - boardX - ballR) / (-veloX)
-            detaY = veloY * tick - (screenY - ballR - ballY)
-            if detaY <= 0:
+            elif (excessY // (SCREEN_Y_SIZE - 2 * ballR)) % 2 == 0:
+                #最终在下边界反弹
+                guessY = SCREEN_Y_SIZE - ballR - excessY % (SCREEN_Y_SIZE - 2 * ballR)
+            elif (excessY // (SCREEN_Y_SIZE - 2 * ballR)) % 2 == 1:
+                #最终在上边界反弹
+                guessY = ballR + excessY % (SCREEN_Y_SIZE - 2 * ballR)
+            return [PLAYER_2_CODE,guessY,tick,0]
+        elif veloX > 0 and veloY < 0:   #往右上的球
+            deltaX = SCREEN_X_SIZE - BOARD_X_SIZE - ballX - ballR   #到右边界的距离
+            tick = deltaX / veloX   #触碰到右边界的时间
+            deltaY = ballY - ballR  #此时与上边界的距离
+            excessY = -(veloY) * tick - deltaY  #超出的距离
+            if excessY < 0:  #没有碰到边界
                 guessY = ballY + veloY * tick
-            elif (detaY // (screenY - 2 * ballR)) % 2 == 0:
-                guessY = screenY - ballR - detaY % (screenY - 2 * ballR)
-            elif (detaY // (screenY - 2 * ballR)) % 2 == 1:
-                guessY = ballR + detaY % (screenY - 2 * ballR)
-            return [0,guessY,tick,0]
-        elif veloX < 0 and veloY < 0:
-            tick = (ballX - boardX - ballR) / (-veloX)
-            detaY = (-veloY) * tick - (ballY - ballR)
-            if detaY < 0:
+            elif (excessY // (SCREEN_Y_SIZE - 2 * ballR)) % 2 == 1:
+                #最终在下边界反弹
+                guessY = SCREEN_Y_SIZE - ballR - excessY % (SCREEN_Y_SIZE - 2 * ballR)
+            elif (excessY // (SCREEN_Y_SIZE - 2 * ballR)) % 2 == 0:
+                #最终在上边界反弹
+                guessY = ballR + excessY % (SCREEN_Y_SIZE - 2 * ballR)            
+            return [PLAYER_2_CODE,guessY,tick,0]
+        elif veloX < 0 and veloY > 0:   #往左下的球
+            deltaX = ballX - ballR - BOARD_X_SIZE   #到左边界的距离
+            tick = deltaX / (-veloX)    #触碰到左边界的时间
+            deltaY = SCREEN_Y_SIZE - ballR - ballY    #此时与下边界的距离
+            excessY = veloY * tick - deltaY     #超出的距离
+            if excessY <= 0:  #没有碰到边界
+                guessY = ballY + veloY * tick
+            elif (excessY // (SCREEN_Y_SIZE - 2 * ballR)) % 2 == 0:
+                #最终在下边界反弹
+                guessY = SCREEN_Y_SIZE - ballR - excessY % (SCREEN_Y_SIZE - 2 * ballR)
+            elif (excessY // (SCREEN_Y_SIZE - 2 * ballR)) % 2 == 1:
+                #最终在上边界反弹
+                guessY = ballR + excessY % (SCREEN_Y_SIZE - 2 * ballR)
+            return [PLAYER_1_CODE,guessY,tick,0]
+        elif veloX < 0 and veloY < 0:   #往坐上的球
+            deltaX = ballX - ballR - BOARD_X_SIZE   #到左边界的距离
+            tick = deltaX / (-veloX)    #触碰到左边界的时间
+            deltaY = ballY - ballR      #此时与上边界的距离
+            excessY = (-veloY) * tick - deltaX  #超出的距离
+            if excessY < 0:  #没有碰到边界
                 guessY = ballY - (-veloY) * tick
-            elif (detaY // (screenY - 2 * ballR)) % 2 == 1:
-                guessY = screenY - ballR - detaY % (screenY - 2 * ballR)
-            elif (detaY // screenY) % 2 == 0:
-                guessY = ballR + detaY % (screenY - 2 * ballR)
-            return [0,guessY,tick,0]
+            elif (excessY // (SCREEN_Y_SIZE - 2 * ballR)) % 2 == 1:
+                #最终在下边界反弹
+                guessY = SCREEN_Y_SIZE - ballR - excessY % (SCREEN_Y_SIZE - 2 * ballR)
+            elif (excessY // SCREEN_Y_SIZE) % 2 == 0:
+                #最终在上边界反弹
+                guessY = ballR + excessY % (SCREEN_Y_SIZE - 2 * ballR)
+            return [PLAYER_1_CODE,guessY,tick,0]
             
