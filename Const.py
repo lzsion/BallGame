@@ -1,12 +1,12 @@
 import pygame
-fps = 144
+fps = 144   #帧率
 circleRadius = 10
 guessRedius = 4
 boardVelo = 8
-computerPlayer = [0,1]
+computerPlayer = [0]
 showGuessPoint = True
 maxBallNum = 5
-intervalTime = 1
+intervalTime = 1    #发球间隔时间
 ballVeloRange = (2,6)
 maxTime = 60
 precision = 8

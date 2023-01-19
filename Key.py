@@ -1,5 +1,5 @@
 class Key:
-    def __init__(self):
+    def __init__(self):     #按键状态 up/down [需要改为判定一个]
         self.down = False
         self.up = True
     def downEvent(self):
