@@ -20,6 +20,6 @@ def main():
             disp.keyEvent(event)
         disp.setScreen(screen)
         pygame.display.flip()
-        fclock.tick(fps)
+        fclock.tick(FPS)
 if __name__ == '__main__':
     main()

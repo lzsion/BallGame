@@ -22,7 +22,7 @@ class Display:
         self.finished = False   #游戏结束
         self.serveTime = time.time()    #上一次发球时间
         self.startTime = time.time()    #游戏开始时间
-        self.timeLast = maxTime     #剩余时间
+        self.timeLast = MAX_TIME     #剩余时间
         # self.textP1 = 'P1: {:^3d}'.format(self.boardLi[0].getScore())
         # self.textP2 = 'P2: {:^3d}'.format(self.boardLi[1].getScore())
         # self.timeText = '{:^3d}'.format(self.timeLast)
@@ -33,7 +33,7 @@ class Display:
     def isStart(self):
         return self.start
     def intervaled(self):   #时间过了intervalTime秒
-        return time.time() - self.serveTime >= intervalTime
+        return time.time() - self.serveTime >= SERVE_INTERVAL_TIME
     def setServeTime(self):
         self.serveTime = time.time()
     def getTime(self):
@@ -43,13 +43,13 @@ class Display:
         if self.countDown:  #在准备倒计时阶段
             self.timeCountDown()    #准备倒计时
         if self.start and self.intervaled():    #发球
-            if len(self.ballLi) < maxBallNum:   #场上球数小于最大球数
+            if len(self.ballLi) < MAX_BALL_NUM:   #场上球数小于最大球数
                 # addBall = Ball()
                 self.ballLi.append(Ball())  #加一个球
                 # self.boardLi[addBall.getGuessedY()[0]].appendGuessY(addBall.getGuessedY())
                 self.setServeTime() #更新发球时间
     def timeCounter(self):  #更新剩余时间
-        if self.start and int(time.time() - self.startTime) >= maxTime - self.timeLast + 1:
+        if self.start and int(time.time() - self.startTime) >= MAX_TIME - self.timeLast + 1:
             self.timeLast -= 1
             if self.timeLast == 0:  #剩余时间为0 游戏结束
                 self.finished = True
@@ -89,8 +89,8 @@ class Display:
     def setScreen(self,screen):
         screen.fill(BACKGROUND_COLOR)    #黑色背景
         if self.finished == False:
-            pygame.draw.rect(screen,RAIL_COLOR,BOUNDARY_LEFT_RECT,0)   #灰色轨道条
-            pygame.draw.rect(screen,RAIL_COLOR,BOUNDARY_RIGHT_RECT,0)
+            pygame.draw.rect(screen,BOUNDARY_COLOR,BOUNDARY_LEFT_RECT,0)   #左右边界灰色轨道条
+            pygame.draw.rect(screen,BOUNDARY_COLOR,BOUNDARY_RIGHT_RECT,0)
         if self.start and not self.finished:    #游戏进行过程
             for eachBall in self.ballLi:    #遍历所有球
                 if eachBall.isOut():    #如果球出界
@@ -98,66 +98,55 @@ class Display:
                     continue
                 eachBall.move(self.boardLi) #正常的球
                 eachBall.show(screen)
-        if not self.boardLi[PLAYER_1_CODE].getIsComputer(): #如果p1不是电脑
-            if self.boardLi[PLAYER_1_CODE].upKey.isDown() and self.boardLi[PLAYER_1_CODE].downKey.isUp():
-                #如果按下'上' 松开'下'
-                self.boardLi[PLAYER_1_CODE].eventKeyUp()    #板子向上移动
-            elif self.boardLi[PLAYER_1_CODE].downKey.isDown() and self.boardLi[PLAYER_1_CODE].upKey.isUp():
-                #如果按下'下' 松开'上'
-                self.boardLi[PLAYER_1_CODE].eventKeyDown()  #板子向下移动
-        elif self.start and not self.finished :
-            if self.boardLi[PLAYER_1_CODE].computerEvent(self.ballLi) == COMPUTER_UP_EVENT:
-                self.boardLi[PLAYER_1_CODE].eventKeyUp()
-            elif self.boardLi[PLAYER_1_CODE].computerEvent(self.ballLi) == COMPUTER_DOWN_EVENT:
-                self.boardLi[0].eventKeyDown()
-        if not self.boardLi[1].getIsComputer():
-            if self.upKey2.isDown() and self.downKey2.isUp():
-                self.boardLi[1].eventKeyUp()
-            elif self.downKey2.isDown() and self.upKey2.isUp():
-                self.boardLi[1].eventKeyDown()
-        elif self.start and not self.finished :
-            if self.boardLi[1].computerEvent(self.ballLi) == computerUpEvent:
-                self.boardLi[1].eventKeyUp()
-            elif self.boardLi[1].computerEvent(self.ballLi) == computerDownEvent:
-                self.boardLi[1].eventKeyDown()
-        if self.finished == False:
-            for eachBoard in self.boardLi:
+        for eachBoard in self.boardLi :
+            if not eachBoard.getIsComputer(): #如果不是电脑
+                if eachBoard.upKey.isDown() and eachBoard.downKey.isUp():   #如果按下'上' 松开'下'                    
+                    eachBoard.eventKeyUp()    #板子向上移动
+                elif eachBoard.downKey.isDown() and eachBoard.upKey.isUp(): #如果按下'下' 松开'上'                    
+                    eachBoard.eventKeyDown()  #板子向下移动
+            else :  #如果是电脑
+                if eachBoard.computerEvent(self.ballLi) == COMPUTER_UP_EVENT:
+                    eachBoard.eventKeyUp()
+                elif eachBoard.computerEvent(self.ballLi) == COMPUTER_DOWN_EVENT:
+                    eachBoard.eventKeyDown()
+        if self.finished == False:  #如果游戏没结束
+            for eachBoard in self.boardLi:  #显示板子
                 eachBoard.show(screen)
-        if self.start == False and self.countDown == False and self.finished == False:
-            for i in range(4):
-                screen.blit(preTextSurf[i],preTextPosi[i])
-        elif self.start == False and self.countDown == True and self.finished == False:
-            countTextSurf = font_3.render(self.timeCountText,True,colorLi[0])
-            screen.blit(countTextSurf,(screenX//2 - 40,screenY//2 - 40))
-        if self.start == True and self.finished == False:
+        if self.start == False and self.countDown == False and self.finished == False:  #最开始界面
+            screen.blit(PREPARE_TEXT_BLIT[0],PREPARE_TEXT_BLIT[1])
+            screen.blit(PREPARE_P1_TEXT_BLIT[0],PREPARE_P1_TEXT_BLIT[1])
+            screen.blit(PREPARE_P2_TEXT_BLIT[0],PREPARE_P2_TEXT_BLIT[1])
+            screen.blit(EDITOR_TEXT_BLIT[0],EDITOR_TEXT_BLIT[1])
+            screen.blit(VERSION_TEXT_BLIT[0],VERSION_TEXT_BLIT[1])
+        elif self.start == False and self.countDown == True and self.finished == False: #倒计时界面
+            countTextSurf = FONT_3.render(self.timeCountText,True,WHITE_COLOR)
+            screen.blit(countTextSurf,(SCREEN_X_SIZE//2 - 40,SCREEN_Y_SIZE//2 - 50))
+        if self.start == True and self.finished == False:   #游戏过程中
             textP1 = 'P1: {:^3d}'.format(self.boardLi[0].getScore())
             textP2 = 'P2: {:^3d}'.format(self.boardLi[1].getScore())
             timeText = '{:^3d}'.format(self.timeLast)
-            textSurf1 = font_1.render(textP1,True,colorLi[1])
-            textSurf2 = font_1.render(textP2,True,colorLi[2])
-            timeTextSurf = font_1.render(timeText,True,colorLi[0])
-            screen.blit(textSurf1,(screenX//2 - 100,0))
-            screen.blit(textSurf2,(screenX//2 + 50 ,0))
-            screen.blit(timeTextSurf,(screenX//2 -10,0))
-        elif self.finished == True:
+            textSurf1 = FONT_1.render(textP1,True,PLAYER_1_COLOR)
+            textSurf2 = FONT_1.render(textP2,True,PLAYER_2_COLOR)
+            timeTextSurf = FONT_1.render(timeText,True,WHITE_COLOR)
+            screen.blit(textSurf1,(SCREEN_X_SIZE//2 - 100,0))
+            screen.blit(textSurf2,(SCREEN_X_SIZE//2 + 50 ,0))
+            screen.blit(timeTextSurf,(SCREEN_X_SIZE//2 -10,0))
+        elif self.finished == True: #游戏结束
             textP1 = 'P1: {:^3d}'.format(self.boardLi[0].getScore())
             textP2 = 'P2: {:^3d}'.format(self.boardLi[1].getScore())
-            textSurf1 = font_2.render(textP1,True,colorLi[1])
-            textSurf2 = font_2.render(textP2,True,colorLi[2])
+            textSurf1 = FONT_2.render(textP1,True,PLAYER_1_COLOR)
+            textSurf2 = FONT_2.render(textP2,True,PLAYER_2_COLOR)
             if self.boardLi[0].getScore() > self.boardLi[1].getScore():
-                winSurf = font_2.render(winText,True,colorLi[3])
-                winPosi = (screenX//2 - 170,screenY//2 - 80)
+                winSurf = FONT_2.render(WIN_TEXT,True,RED_COLOR)
+                winPosi = (SCREEN_X_SIZE//2 - 170,SCREEN_Y_SIZE//2 - 80)
             elif self.boardLi[0].getScore() < self.boardLi[1].getScore():
-                winSurf = font_2.render(winText,True,colorLi[3])
-                winPosi = (screenX//2 + 80,screenY//2 - 80)
+                winSurf = FONT_2.render(WIN_TEXT,True,RED_COLOR)
+                winPosi = (SCREEN_X_SIZE//2 + 80,SCREEN_Y_SIZE//2 - 80)
             else :
-                winSurf = font_2.render(drawText,True,colorLi[0])
-                winPosi = (screenX//2 - 30,screenY//2 - 100)
-            screen.blit(textSurf1,(screenX//2 -150,screenY//2 - 20))
-            screen.blit(textSurf2,(screenX//2 +100,screenY//2 - 20))
+                winSurf = FONT_2.render(DRAW_TEXT,True,WHITE_COLOR)
+                winPosi = (SCREEN_X_SIZE//2 - 30,SCREEN_Y_SIZE//2 - 100)
+            screen.blit(textSurf1,(SCREEN_X_SIZE//2 -150,SCREEN_Y_SIZE//2 - 20))
+            screen.blit(textSurf2,(SCREEN_X_SIZE//2 +100,SCREEN_Y_SIZE//2 - 20))
             screen.blit(winSurf,winPosi)
-            screen.blit(preTextSurf[3],preTextPosi[3])
-            screen.blit(preTextSurf[4],preTextPosi[4])
-            screen.blit(preTextSurf[5],preTextPosi[5])
-
-
+            screen.blit(REMAKE_TEXT_BLIT[0],REMAKE_TEXT_BLIT[1])
+            screen.blit(TIME_OUT_TEXT_BLIT[0],TIME_OUT_TEXT_BLIT[1])
