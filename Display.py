@@ -7,7 +7,7 @@ class Display:
     def __init__(self):
         self.ballLi = []    #小球列表
         self.BallVelo = 6
-        self.boardLi = [Board('player1'),Board('player2')]  #玩家移动的板       
+        self.boardLi = [Board('player1'),Board('player2')]  #玩家移动的板
         for eachCP in computerPlayer:   #设置玩家为电脑
             self.boardLi[eachCP].setIsComputer()
         # ballLi.append(Ball(velo//3))
@@ -97,7 +97,7 @@ class Display:
                     self.ballLi.remove(eachBall)    #移除该球
                     continue
                 eachBall.move(self.boardLi) #正常的球
-                eachBall.show(screen)
+                eachBall.show(screen)   #显示球
         for eachBoard in self.boardLi :
             if not eachBoard.getIsComputer(): #如果不是电脑
                 if eachBoard.upKey.isDown() and eachBoard.downKey.isUp():   #如果按下'上' 松开'下'                    
@@ -110,43 +110,42 @@ class Display:
                 elif eachBoard.computerEvent(self.ballLi) == COMPUTER_DOWN_EVENT:
                     eachBoard.eventKeyDown()
         if self.finished == False:  #如果游戏没结束
-            for eachBoard in self.boardLi:  #显示板子
-                eachBoard.show(screen)
+            for eachBoard in self.boardLi:
+                eachBoard.show(screen)  #显示板子
         if self.start == False and self.countDown == False and self.finished == False:  #最开始界面
+            screen.blit(TITLE_TEXT_BLIT[0],TITLE_TEXT_BLIT[1])
             screen.blit(PREPARE_TEXT_BLIT[0],PREPARE_TEXT_BLIT[1])
             screen.blit(PREPARE_P1_TEXT_BLIT[0],PREPARE_P1_TEXT_BLIT[1])
             screen.blit(PREPARE_P2_TEXT_BLIT[0],PREPARE_P2_TEXT_BLIT[1])
             screen.blit(EDITOR_TEXT_BLIT[0],EDITOR_TEXT_BLIT[1])
             screen.blit(VERSION_TEXT_BLIT[0],VERSION_TEXT_BLIT[1])
-        elif self.start == False and self.countDown == True and self.finished == False: #倒计时界面
-            countTextSurf = FONT_3.render(self.timeCountText,True,WHITE_COLOR)
-            screen.blit(countTextSurf,(SCREEN_X_SIZE//2 - 40,SCREEN_Y_SIZE//2 - 50))
+        elif self.start == False and self.countDown == True and self.finished == False: #准备倒计时界面
+            countdownTextSurf = FONT_3.render(self.timeCountText,True,WHITE_COLOR)
+            screen.blit(countdownTextSurf,READY_COUNTDOWN_TEXT_POSI)
         if self.start == True and self.finished == False:   #游戏过程中
-            textP1 = 'P1: {:^3d}'.format(self.boardLi[0].getScore())
-            textP2 = 'P2: {:^3d}'.format(self.boardLi[1].getScore())
-            timeText = '{:^3d}'.format(self.timeLast)
-            textSurf1 = FONT_1.render(textP1,True,PLAYER_1_COLOR)
-            textSurf2 = FONT_1.render(textP2,True,PLAYER_2_COLOR)
+            scoreTextP1 = 'P1: {:^3d}'.format(self.boardLi[PLAYER_1_CODE].getScore())    #比分
+            scoreTextP2 = 'P2: {:^3d}'.format(self.boardLi[PLAYER_2_CODE].getScore())
+            timeText = '{:^3d}'.format(self.timeLast)   #倒计时时间
+            scoreTextSurfP1 = FONT_1.render(scoreTextP1,True,PLAYER_1_COLOR)
+            scoreTextSurfP2 = FONT_1.render(scoreTextP2,True,PLAYER_2_COLOR)
             timeTextSurf = FONT_1.render(timeText,True,WHITE_COLOR)
-            screen.blit(textSurf1,(SCREEN_X_SIZE//2 - 100,0))
-            screen.blit(textSurf2,(SCREEN_X_SIZE//2 + 50 ,0))
-            screen.blit(timeTextSurf,(SCREEN_X_SIZE//2 -10,0))
+            screen.blit(scoreTextSurfP1,GAME_PROCESSES_P1_SCORE_TEXT_POSI)
+            screen.blit(scoreTextSurfP2,GAME_PROCESSES_P2_SCORE_TEXT_POSI)
+            screen.blit(timeTextSurf,GAME_PROCESSES_TIME_TEXT_POSI)
         elif self.finished == True: #游戏结束
-            textP1 = 'P1: {:^3d}'.format(self.boardLi[0].getScore())
-            textP2 = 'P2: {:^3d}'.format(self.boardLi[1].getScore())
-            textSurf1 = FONT_2.render(textP1,True,PLAYER_1_COLOR)
-            textSurf2 = FONT_2.render(textP2,True,PLAYER_2_COLOR)
-            if self.boardLi[0].getScore() > self.boardLi[1].getScore():
-                winSurf = FONT_2.render(WIN_TEXT,True,RED_COLOR)
-                winPosi = (SCREEN_X_SIZE//2 - 170,SCREEN_Y_SIZE//2 - 80)
-            elif self.boardLi[0].getScore() < self.boardLi[1].getScore():
-                winSurf = FONT_2.render(WIN_TEXT,True,RED_COLOR)
-                winPosi = (SCREEN_X_SIZE//2 + 80,SCREEN_Y_SIZE//2 - 80)
-            else :
-                winSurf = FONT_2.render(DRAW_TEXT,True,WHITE_COLOR)
-                winPosi = (SCREEN_X_SIZE//2 - 30,SCREEN_Y_SIZE//2 - 100)
-            screen.blit(textSurf1,(SCREEN_X_SIZE//2 -150,SCREEN_Y_SIZE//2 - 20))
-            screen.blit(textSurf2,(SCREEN_X_SIZE//2 +100,SCREEN_Y_SIZE//2 - 20))
-            screen.blit(winSurf,winPosi)
+            scoreTextP1 = 'P1: {:^3d}'.format(self.boardLi[PLAYER_1_CODE].getScore())
+            scoreTextP2 = 'P2: {:^3d}'.format(self.boardLi[PLAYER_2_CODE].getScore())
+            scoreTextSurfP1 = FONT_2.render(scoreTextP1,True,PLAYER_1_COLOR)
+            scoreTextSurfP2 = FONT_2.render(scoreTextP2,True,PLAYER_2_COLOR)
+            if self.boardLi[PLAYER_1_CODE].getScore() > self.boardLi[PLAYER_2_CODE].getScore():
+                screen.blit(P1_WIN_TEXT_BLIT[0],P1_WIN_TEXT_BLIT[1])    #p1获胜                
+            elif self.boardLi[PLAYER_1_CODE].getScore() < self.boardLi[PLAYER_2_CODE].getScore():
+                screen.blit(P2_WIN_TEXT_BLIT[0],P2_WIN_TEXT_BLIT[1])    #p2获胜
+            else :  #平局
+                screen.blit(DRAW_TEXT_BLIT[0],DRAW_TEXT_BLIT[1])
+            screen.blit(scoreTextSurfP1,GAME_OVER_P1_SCORE_TEXT_POSI)
+            screen.blit(scoreTextSurfP2,GAME_OVER_P2_SCORE_TEXT_POSI)
             screen.blit(REMAKE_TEXT_BLIT[0],REMAKE_TEXT_BLIT[1])
             screen.blit(TIME_OUT_TEXT_BLIT[0],TIME_OUT_TEXT_BLIT[1])
+            screen.blit(EDITOR_TEXT_BLIT[0],EDITOR_TEXT_BLIT[1])
+            screen.blit(VERSION_TEXT_BLIT[0],VERSION_TEXT_BLIT[1])
