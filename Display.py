@@ -10,24 +10,12 @@ class Display:
         self.BallVelo = 6
         self.boardLi = [Board(PLAYER_1_NAME),Board(PLAYER_2_NAME)]  #玩家移动的板
         self.selectLi = [SelectPlayer(PLAYER_1_NAME),SelectPlayer(PLAYER_2_NAME)]
-        # for eachCP in computerPlayer:   #设置玩家为电脑
-        #     self.boardLi[eachCP].setIsComputer()
-        # ballLi.append(Ball(velo//3))
-        # for i in range(ballNum):
-        #     ballLi.append(Ball())
-        # self.upKey1 = Key()     #p1向上
-        # self.downKey1 = Key()   #p1向下
-        # self.upKey2 = Key()     #p2向上
-        # self.downKey2 = Key()   #p2向下
-        self.start = False  #游戏阶段
+        self.start = False  #游戏阶段开始
         self.countDown = False  #准备阶段开始倒计时
         self.finished = False   #游戏结束
         self.serveTime = time.time()    #上一次发球时间
         self.startTime = time.time()    #游戏开始时间
         self.timeLast = MAX_TIME     #剩余时间
-        # self.textP1 = 'P1: {:^3d}'.format(self.boardLi[0].getScore())
-        # self.textP2 = 'P2: {:^3d}'.format(self.boardLi[1].getScore())
-        # self.timeText = '{:^3d}'.format(self.timeLast)
         self.timeCountText = '3'
     def begin(self):    #按空格开始后打开倒计时开关
         self.countDown = True
@@ -49,9 +37,7 @@ class Display:
             self.timeCountDown()    #准备倒计时
         if self.start and self.intervaled():    #发球
             if len(self.ballLi) < MAX_BALL_NUM:   #场上球数小于最大球数
-                # addBall = Ball()
                 self.ballLi.append(Ball())  #加一个球
-                # self.boardLi[addBall.getGuessedY()[0]].appendGuessY(addBall.getGuessedY())
                 self.setServeTime() #更新发球时间
     def timeCounter(self):  #更新剩余时间
         if self.start and int(time.time() - self.startTime) >= MAX_TIME - self.timeLast + 1:
@@ -117,7 +103,6 @@ class Display:
             elif each.downKey.isDown() and each.upKey.isUp():
                 each.eventKeyDown()
             each.move()
-
     def updateBoard(self):  #更新板子        
         for eachBoard in self.boardLi :
             if not eachBoard.getIsComputer(): #如果不是电脑

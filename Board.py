@@ -1,7 +1,5 @@
 from tkinter import N
 import pygame
-import random
-import math
 from Const import *
 from Key import *
 class Board:
@@ -18,18 +16,11 @@ class Board:
         self.score = 0  #得分
         self.upKey = Key()
         self.downKey = Key()
-        # self.guessedY = []
         self.isComputer = False     #是否为电脑
     def setIsComputer(self,isComputer):
         self.isComputer = isComputer
     def getIsComputer(self):
         return self.isComputer
-    # def appendGuessY(self,item):
-    #     self.guessedY.append(item)
-    # def removeGuessY(self,item):
-    #     self.guessedY.remove(item)
-    # def getGuessedY(self):
-    #     return self.guessedY
     def getPosi(self):
         return self.posi
     def getName(self):
@@ -70,11 +61,7 @@ class Board:
                 if sideBoardBottom + guessedY[GUESSED_Y_TICK] * BOARD_VELOCITY < guessedY[GUESSED_Y_GUESS_Y]:
                     #板子现在往下也来不及
                     continue
-                sideBallLi.append(guessedY)
-                # if guessedY[2] < minTick:
-                #     minTick = guessedY[2]
-                #     minBall = eachBall
-                #     haveBall = True
+                sideBallLi.append(guessedY)                
         if len(sideBallLi) == 1:    #如果只有一个可以接到的球
             minGuessY = min(sideBallLi,key = lambda x : x[GUESSED_Y_TICK])  #下一个到达的球
             if minGuessY[GUESSED_Y_GUESS_Y] > SCREEN_Y_SIZE // 2 :  #预计落点在下半屏幕
