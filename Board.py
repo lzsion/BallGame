@@ -6,11 +6,11 @@ from Const import *
 from Key import *
 class Board:
     def __init__(self,name):
-        if name == 'player1':
+        if name == PLAYER_1_NAME:
             self.color = PLAYER_1_COLOR
             self.posi = BOARD_LEFT_POSI           
             self.name = PLAYER_1_CODE
-        elif name == 'player2':
+        elif name == PLAYER_2_NAME:
             self.color = PLAYER_2_COLOR
             self.posi = BOARD_RIGHT_POSI            
             self.name = PLAYER_2_CODE
@@ -20,8 +20,8 @@ class Board:
         self.downKey = Key()
         # self.guessedY = []
         self.isComputer = False     #是否为电脑
-    def setIsComputer(self):
-        self.isComputer = True
+    def setIsComputer(self,isComputer):
+        self.isComputer = isComputer
     def getIsComputer(self):
         return self.isComputer
     # def appendGuessY(self,item):

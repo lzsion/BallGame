@@ -121,7 +121,7 @@ class Ball():
                     boardLi[PLAYER_1_CODE].addScore()
     def show(self,screen):
         pygame.draw.circle(screen,self.color,self.posi,self.radius)
-        if showGuessPoint:  #如果要绘出预测落点球
+        if SHOW_GUESS_POINT:  #如果要绘出预测落点球
             if self.guessedY[GUESSED_Y_DROP_ONTO] == PLAYER_1_CODE :    #预计落在左边
                 guessPosi = (BOARD_X_SIZE,self.guessedY[GUESSED_Y_GUESS_Y])                
             elif self.guessedY[GUESSED_Y_DROP_ONTO] == PLAYER_2_CODE :  #预计落在右边

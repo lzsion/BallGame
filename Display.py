@@ -1,15 +1,17 @@
 from Ball import *
 from Board import * 
 from Key import * 
+from SelectPlayer import *
 import time
 import pygame
 class Display:
     def __init__(self):
         self.ballLi = []    #小球列表
         self.BallVelo = 6
-        self.boardLi = [Board('player1'),Board('player2')]  #玩家移动的板
-        for eachCP in computerPlayer:   #设置玩家为电脑
-            self.boardLi[eachCP].setIsComputer()
+        self.boardLi = [Board(PLAYER_1_NAME),Board(PLAYER_2_NAME)]  #玩家移动的板
+        self.selectLi = [SelectPlayer(PLAYER_1_NAME),SelectPlayer(PLAYER_2_NAME)]
+        # for eachCP in computerPlayer:   #设置玩家为电脑
+        #     self.boardLi[eachCP].setIsComputer()
         # ballLi.append(Ball(velo//3))
         # for i in range(ballNum):
         #     ballLi.append(Ball())
@@ -30,6 +32,9 @@ class Display:
     def begin(self):    #按空格开始后打开倒计时开关
         self.countDown = True
         self.startTime = time.time()
+        #更新选择了电脑还是玩家
+        self.boardLi[PLAYER_1_CODE].setIsComputer(self.selectLi[PLAYER_1_CODE].isSelectComputer())
+        self.boardLi[PLAYER_2_CODE].setIsComputer(self.selectLi[PLAYER_2_CODE].isSelectComputer())       
     def isStart(self):
         return self.start
     def intervaled(self):   #时间过了intervalTime秒
@@ -74,8 +79,18 @@ class Display:
                     self.boardLi[PLAYER_2_CODE].upKey.downEvent()     #上键按下
                 if event.key == pygame.K_DOWN:
                     self.boardLi[PLAYER_2_CODE].downKey.downEvent()   #下键按下
-            if event.key == pygame.K_SPACE and self.countDown == False and self.start == False and self.finished == False:
-                self.begin()    #空格键开始
+            if self.countDown == False and self.start == False and self.finished == False:  #开始界面
+                if event.key == pygame.K_SPACE :
+                    self.begin()    #空格键开始
+                else :
+                    if event.key == pygame.K_w:
+                        self.selectLi[PLAYER_1_CODE].upKey.downEvent()
+                    if event.key == pygame.K_s:
+                        self.selectLi[PLAYER_1_CODE].downKey.downEvent()
+                    if event.key == pygame.K_UP:
+                        self.selectLi[PLAYER_2_CODE].upKey.downEvent()
+                    if event.key == pygame.K_DOWN:
+                        self.selectLi[PLAYER_2_CODE].downKey.downEvent()
         if event.type == pygame.KEYUP:
             if self.start and not self.finished:    #游戏进行过程
                 if event.key == pygame.K_w:
@@ -86,18 +101,24 @@ class Display:
                     self.boardLi[PLAYER_2_CODE].upKey.upEvent()       #上键松开
                 if event.key == pygame.K_DOWN:
                     self.boardLi[PLAYER_2_CODE].downKey.upEvent()     #下键松开
-    def setScreen(self,screen):
-        screen.fill(BACKGROUND_COLOR)    #黑色背景
-        if self.finished == False:
-            pygame.draw.rect(screen,BOUNDARY_COLOR,BOUNDARY_LEFT_RECT,0)   #左右边界灰色轨道条
-            pygame.draw.rect(screen,BOUNDARY_COLOR,BOUNDARY_RIGHT_RECT,0)
-        if self.start and not self.finished:    #游戏进行过程
-            for eachBall in self.ballLi:    #遍历所有球
-                if eachBall.isOut():    #如果球出界
-                    self.ballLi.remove(eachBall)    #移除该球
-                    continue
-                eachBall.move(self.boardLi) #正常的球
-                eachBall.show(screen)   #显示球
+            if self.countDown == False and self.start == False and self.finished == False:  #开始界面
+                if event.key == pygame.K_w:
+                    self.selectLi[PLAYER_1_CODE].upKey.upEvent()
+                if event.key == pygame.K_s:
+                    self.selectLi[PLAYER_1_CODE].downKey.upEvent()
+                if event.key == pygame.K_UP:
+                    self.selectLi[PLAYER_2_CODE].upKey.upEvent()
+                if event.key == pygame.K_DOWN:
+                    self.selectLi[PLAYER_2_CODE].downKey.upEvent()
+    def updateSelect(self): #更新选择        
+        for each in self.selectLi:
+            if each.upKey.isDown() and each.downKey.isUp():                
+                each.eventKeyUp()
+            elif each.downKey.isDown() and each.upKey.isUp():
+                each.eventKeyDown()
+            each.move()
+
+    def updateBoard(self):  #更新板子        
         for eachBoard in self.boardLi :
             if not eachBoard.getIsComputer(): #如果不是电脑
                 if eachBoard.upKey.isDown() and eachBoard.downKey.isUp():   #如果按下'上' 松开'下'                    
@@ -109,20 +130,17 @@ class Display:
                     eachBoard.eventKeyUp()
                 elif eachBoard.computerEvent(self.ballLi) == COMPUTER_DOWN_EVENT:
                     eachBoard.eventKeyDown()
-        if self.finished == False:  #如果游戏没结束
-            for eachBoard in self.boardLi:
-                eachBoard.show(screen)  #显示板子
-        if self.start == False and self.countDown == False and self.finished == False:  #最开始界面
+    def showStartFace(self,screen):
             screen.blit(TITLE_TEXT_BLIT[0],TITLE_TEXT_BLIT[1])
-            screen.blit(PREPARE_TEXT_BLIT[0],PREPARE_TEXT_BLIT[1])
-            screen.blit(PREPARE_P1_TEXT_BLIT[0],PREPARE_P1_TEXT_BLIT[1])
-            screen.blit(PREPARE_P2_TEXT_BLIT[0],PREPARE_P2_TEXT_BLIT[1])
+            screen.blit(PREPARE_TEXT_BLIT[0],PREPARE_TEXT_BLIT[1])            
+            for each in self.selectLi :
+                each.show(screen)
             screen.blit(EDITOR_TEXT_BLIT[0],EDITOR_TEXT_BLIT[1])
             screen.blit(VERSION_TEXT_BLIT[0],VERSION_TEXT_BLIT[1])
-        elif self.start == False and self.countDown == True and self.finished == False: #准备倒计时界面
+    def showReadyCounterFace(self,screen):
             countdownTextSurf = FONT_3.render(self.timeCountText,True,WHITE_COLOR)
             screen.blit(countdownTextSurf,READY_COUNTDOWN_TEXT_POSI)
-        if self.start == True and self.finished == False:   #游戏过程中
+    def showGameProcessesFace(self,screen):
             scoreTextP1 = 'P1: {:^3d}'.format(self.boardLi[PLAYER_1_CODE].getScore())    #比分
             scoreTextP2 = 'P2: {:^3d}'.format(self.boardLi[PLAYER_2_CODE].getScore())
             timeText = '{:^3d}'.format(self.timeLast)   #倒计时时间
@@ -132,7 +150,7 @@ class Display:
             screen.blit(scoreTextSurfP1,GAME_PROCESSES_P1_SCORE_TEXT_POSI)
             screen.blit(scoreTextSurfP2,GAME_PROCESSES_P2_SCORE_TEXT_POSI)
             screen.blit(timeTextSurf,GAME_PROCESSES_TIME_TEXT_POSI)
-        elif self.finished == True: #游戏结束
+    def showGameOverFace(self,screen):
             scoreTextP1 = 'P1: {:^3d}'.format(self.boardLi[PLAYER_1_CODE].getScore())
             scoreTextP2 = 'P2: {:^3d}'.format(self.boardLi[PLAYER_2_CODE].getScore())
             scoreTextSurfP1 = FONT_2.render(scoreTextP1,True,PLAYER_1_COLOR)
@@ -149,3 +167,29 @@ class Display:
             screen.blit(TIME_OUT_TEXT_BLIT[0],TIME_OUT_TEXT_BLIT[1])
             screen.blit(EDITOR_TEXT_BLIT[0],EDITOR_TEXT_BLIT[1])
             screen.blit(VERSION_TEXT_BLIT[0],VERSION_TEXT_BLIT[1])
+    def setScreen(self,screen):
+        screen.fill(BACKGROUND_COLOR)    #黑色背景
+        if self.finished == False:  #如果游戏没结束
+            pygame.draw.rect(screen,BOUNDARY_COLOR,BOUNDARY_LEFT_RECT,0)    #显示灰色轨道条
+            pygame.draw.rect(screen,BOUNDARY_COLOR,BOUNDARY_RIGHT_RECT,0)            
+        if self.countDown == False and self.start == False and self.finished == False:  #开始界面
+            self.updateSelect()
+        if self.start and not self.finished:    #游戏进行过程
+            self.updateBoard()  #更新板子
+            for eachBall in self.ballLi:    #遍历所有球
+                if eachBall.isOut():    #如果球出界
+                    self.ballLi.remove(eachBall)    #移除该球
+                    continue
+                eachBall.move(self.boardLi) #正常的球
+                eachBall.show(screen)   #显示球
+        if self.finished == False:  #如果游戏没结束
+            for eachBoard in self.boardLi:
+                eachBoard.show(screen)  #显示板子
+        if self.start == False and self.countDown == False and self.finished == False:  #最开始界面
+            self.showStartFace(screen)
+        elif self.start == False and self.countDown == True and self.finished == False: #准备倒计时界面
+            self.showReadyCounterFace(screen)
+        if self.start == True and self.finished == False:   #游戏过程中
+            self.showGameProcessesFace(screen)
+        elif self.finished == True: #游戏结束
+            self.showGameOverFace(screen)
